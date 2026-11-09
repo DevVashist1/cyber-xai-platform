@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Cyber XAI Guard</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Arial, sans-serif; padding: 14px; width: 300px; margin: 0; background: #ffffff; color: #1f2937; }
+    h3 { margin: 0 0 10px 0; font-size: 15px; display: flex; align-items: center; justify-content: space-between; }
+    .badge { font-size: 11px; padding: 4px 8px; border-radius: 4px; font-weight: 700; display: inline-block; margin-bottom: 10px; }
+    .badge-active { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+    .badge-inactive { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+    label { font-size: 11px; font-weight: 700; color: #4b5563; display: block; margin-bottom: 3px; }
+    input, button { width: 100%; box-sizing: border-box; margin-bottom: 8px; padding: 7px 9px; font-size: 12px; border: 1px solid #d1d5db; border-radius: 5px; }
+    button { background: #2563eb; color: white; border: none; cursor: pointer; font-weight: 600; }
+    button:hover { background: #1d4ed8; }
+    .btn-secondary { background: #4b5563; }
+    .btn-reset { background: #dc2626; margin-top: 4px; }
+    .info-box { background: #f9fafb; border: 1px solid #e5e7eb; padding: 9px; border-radius: 6px; font-size: 11px; line-height: 1.5; margin-bottom: 8px; }
+    .transparency-note { background: #eff6ff; border: 1px solid #bfdbfe; color: #1e3a8a; padding: 8px; border-radius: 6px; font-size: 10.5px; line-height: 1.4; margin-top: 8px; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <h3>
+    <span>🛡️ Cyber XAI Guard</span>
+    <span style="font-size: 10px; color: #6b7280; font-weight: normal;">v1.0.0</span>
+  </h3>
+  <div id="statusBadge" class="badge badge-inactive">Status: Not Registered</div>
+
+  <div id="registerForm">
+    <label>Employee User ID (CERT Mapping)</label>
+    <input type="text" id="userId" value="EMP001">
+    <label>Enrollment Code</label>
+    <input type="password" id="enrollmentCode" value="team-secret-code-2026">
+    <button id="registerBtn">Register Device</button>
+  </div>
+
+  <div id="registeredView" class="hidden">
+    <div class="info-box" id="deviceInfo"></div>
+    <button id="syncBtn" class="btn-secondary">Sync Rules / Flush Queue</button>
+    <button id="resetBtn" class="btn-reset">Unlink Device</button>
+  </div>
+
+  <div id="errorBox" class="info-box hidden" style="color: #b91c1c; border-color: #fca5a5;"></div>
+
+  <div class="transparency-note">
+    <strong>Transparency Note:</strong> This extension records which AI sites you use and how sensitive pasted content looks. It never sends the content itself.
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

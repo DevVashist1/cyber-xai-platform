@@ -1,0 +1,14 @@
+﻿.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.sqlite3
+.env
+.DS_Store
+pgdata/
+redisdata/
+*.npz
+*.rar
+*.zip
+data/

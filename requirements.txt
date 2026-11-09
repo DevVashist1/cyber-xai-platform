@@ -1,0 +1,16 @@
+pandas==2.2.2
+numpy==1.26.4
+SQLAlchemy==2.0.30
+psycopg2-binary==2.9.9
+pyarrow==16.1.0
+python-dotenv==1.0.1
+Django==5.1.2
+djangorestframework==3.15.2
+django-cors-headers==4.6.0
+redis==5.2.0
+xgboost==2.1.2
+scikit-learn==1.5.2
+Faker==30.8.1
+pytest==8.3.3
+pytest-django==4.9.0
+python-dotenv==1.0.1

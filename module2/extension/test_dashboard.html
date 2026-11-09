@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Cyber XAI Test Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; max-width: 500px; margin: auto; }
+    input, button { width: 100%; box-sizing: border-box; margin-bottom: 10px; padding: 8px; }
+    button { background: #2563eb; color: white; border: none; cursor: pointer; border-radius: 4px; }
+    button:hover { background: #1d4ed8; }
+    pre { background: #f4f4f4; padding: 10px; border-radius: 4px; word-break: break-all; }
+  </style>
+</head>
+<body>
+  <h2>Cyber XAI Insider Threat Dashboard</h2>
+  
+  <h3>1. Register Device</h3>
+  <input type="text" id="userId" value="EMP001" placeholder="User ID">
+  <input type="password" id="enrollmentCode" value="team-secret-code-2026" placeholder="Enrollment Code">
+  <button id="registerBtn">Register Device</button>
+  <pre id="regResult">Not registered yet.</pre>
+
+  <h3>2. Simulate Paste Event</h3>
+  <button id="pasteBtn" disabled>Send Test Paste Event</button>
+  <pre id="pasteResult">No event sent yet.</pre>
+
+  <script>
+    let savedToken = "";
+    let savedDeviceId = "";
+
+    document.getElementById("registerBtn").addEventListener("click", async () => {
+      const userId = document.getElementById("userId").value.trim();
+      const enrollmentCode = document.getElementById("enrollmentCode").value.trim();
+
+      try {
+        const res = await fetch("http://localhost:8000/api/v1/devices/register/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user_id: userId, enrollment_code: enrollmentCode })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          savedToken = data.device_token;
+          savedDeviceId = data.device_id;
+          document.getElementById("regResult").innerText = JSON.stringify(data, null, 2);
+          document.getElementById("pasteBtn").disabled = false;
+        } else {
+          document.getElementById("regResult").innerText = "Error: " + JSON.stringify(data);
+        }
+      } catch (err) {
+        document.getElementById("regResult").innerText = "Connection error: " + err.message;
+      }
+    });
+
+    document.getElementById("pasteBtn").addEventListener("click", async () => {
+      const payload = {
+        event_id: crypto.randomUUID(),
+        occurred_at: new Date().toISOString(),
+        site_domain: "chatgpt.com",
+        event_type: "paste",
+        content_length: 350,
+        line_count: 12,
+        regex_score: 0.1,
+        ml_score: 0.2,
+        final_score: 0.15,
+        risk_tier: "low",
+        action: "logged",
+        ruleset_version: 1,
+        model_version: 1
+      };
+
+      try {
+        const res = await fetch("http://localhost:8000/api/v1/events/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${savedToken}`
+          },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        document.getElementById("pasteResult").innerText = JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById("pasteResult").innerText = "Connection error: " + err.message;
+      }
+    });
+  </script>
+</body>
+</html>
