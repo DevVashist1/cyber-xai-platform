@@ -187,6 +187,9 @@ print("[PASS] S-01 to S-04 & H-01 to H-04: API Auth, Privacy Field Rejection, Cl
 
 # 5. RULE ENGINE TESTS: AG-01 TO AG-10 (Section 13 & Section 15 T-Tests)
 BehRuleFlag.objects.filter(user_id="EMP_M3_01").delete()
+AgtUsbEvent.objects.filter(user_id="EMP_M3_01").delete()
+AgtFileTransferEvent.objects.filter(user_id="EMP_M3_01").delete()
+AgtClipboardEvent.objects.filter(user_id="EMP_M3_01").delete()
 
 usb_eid = str(uuid.uuid4())
 process_single_agent_event({
