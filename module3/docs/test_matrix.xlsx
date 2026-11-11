@@ -1,0 +1,10 @@
+ID,Category,Test,Result
+U-01..U-08,USB Watcher,"10x pair, 2s debounce, multi-stick, fixed USB HDD, HID ignore, MTP",PASS
+F-01..F-08,File Sessions,"1000-file burst, final size re-read, zip count, unplug flush, zero filenames",PASS
+C-01..C-10,Clipboard & Scorer,"Low counter, high/AI context, password manager skip, 5MB cap, JS parity",PASS
+P-01..P-03,AI Desktop Apps,"Process polling, continuous focus duration, browser AI keyword match",PASS
+G-01..G-06,Agent Core,"Mutex single-instance lock, SQLite outbox eviction, watcher crash recovery",PASS
+S-01..S-04,Backend & Stream,"1000-event burst, idempotency, bad token/schema rejection, M1/M2 intact",PASS
+H-01..H-04,Health & Heartbeat,"Heartbeat gap, clock skew >300s, graceful vs unclean restart alerts",PASS
+X-01..X-06,Privacy & Budget,"Zero raw text/filenames/titles in network, SQLite outbox, or logs; <100MB RAM",PASS
+T-01..T-10,Rules AG-01..AG-10,All 10 server-side behavioral rules + MITRE ATT&CK tags verified,PASS

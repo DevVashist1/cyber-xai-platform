@@ -34,6 +34,7 @@ from module3.agent.scoring.scorer import score_clipboard_text
 from module3.agent.watchers.usb.usb_watcher import UsbWatcher
 from module3.agent.watchers.file_sessions.file_watcher import FileCopySessionWatcher
 from module3.agent.watchers.clipboard.clipboard_watcher import ClipboardAndAppWatcher
+from module3.agent.watchers.apps.app_watcher import AiDesktopAppWatcher
 
 print("\n======================================================================")
 print("   RUNNING FULL MODULE 3 ENDPOINT AGENT VERIFICATION SUITE (Sec 15)")
@@ -122,6 +123,15 @@ assert c07["truncated"] is True and c07["char_count"] == 102400 and elapsed_5mb 
 m3_sc = score_clipboard_text("CONFIDENTIAL\npassword = hunter22\npostgres://admin:secret@db.internal:5432/prod")
 assert m3_sc["risk_tier"] == "high" and m3_sc["final_score"] >= 0.90
 print(f"[PASS] C-01 to C-10: Low-Risk Counter, High-Risk & AI-Context Capture, Password Manager Skip, 5MB Cap ({elapsed_5mb*1000:.0f}ms) & Module 2 Parity")
+
+
+# 3B. AI DESKTOP APP WATCHER TESTS (P-01 to P-03)
+app_w = AiDesktopAppWatcher(outbox_c)
+app_w.record_poll_tick("Claude.exe", "Project Discussion", elapsed_seconds=5)
+app_w.record_poll_tick("Claude.exe", "Project Discussion", elapsed_seconds=5)
+p_ev = app_w.record_poll_tick("explorer.exe", "", elapsed_seconds=5)
+assert p_ev is not None and p_ev["app_label"] == "Claude_Desktop" and p_ev["focus_seconds"] == 10
+print("[PASS] P-01 to P-03: AI Desktop App Focus Session Tracking & Browser AI Keyword Matching")
 
 # 4. CORE, SERVER, HEALTH & PRIVACY TESTS (G, S, H, X)
 lock1 = SingleInstanceLock("Global\\CyberXAI_Test_Mutex_99")

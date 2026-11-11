@@ -22,8 +22,33 @@ from module3.agent.core.agent_core import (
 )
 from module3.agent.watchers.usb.usb_watcher import UsbWatcher
 from module3.agent.watchers.file_sessions.file_watcher import FileCopySessionWatcher
-from module3.agent.watchers.clipboard.clipboard_watcher import ClipboardAndAppWatcher
+from module3.agent.watchers.clipboard.clipboard_watcher import ClipboardAndAppWatcher, PASSWORD_MANAGER_FORMATS
+from module3.agent.watchers.apps.app_watcher import AiDesktopAppWatcher
 from module3.agent.ui.tray import AgentTrayUI, TRANSPARENCY_NOTE
+
+try:
+    import win32clipboard
+    import win32gui
+    import win32process
+except ImportError:
+    win32clipboard = None
+    win32gui = None
+    win32process = None
+
+
+def get_foreground_process_and_title():
+    if win32gui is None or win32process is None:
+        return "unknown.exe", ""
+    try:
+        hwnd = win32gui.GetForegroundWindow()
+        if not hwnd:
+            return "unknown.exe", ""
+        title = win32gui.GetWindowText(hwnd) or ""
+        _, pid = win32process.GetWindowThreadProcessId(hwnd)
+        proc_name = psutil.Process(pid).name() if pid > 0 else "unknown.exe"
+        return proc_name, title
+    except Exception:
+        return "unknown.exe", ""
 
 
 class EndpointAgentRuntime:
@@ -46,6 +71,7 @@ class EndpointAgentRuntime:
         self.file_watcher = FileCopySessionWatcher(self.outbox)
         self.usb_watcher = UsbWatcher(self.outbox, file_session_watcher=self.file_watcher)
         self.cb_watcher = ClipboardAndAppWatcher(self.outbox)
+        self.app_watcher = AiDesktopAppWatcher(self.outbox)
 
         self.device_id = None
         self.device_token = None
@@ -132,6 +158,82 @@ class EndpointAgentRuntime:
             return True
         return False
 
+    def _usb_poll_loop(self, stop_ev: threading.Event):
+        known_mounts = set()
+        for part in psutil.disk_partitions(all=False):
+            if "removable" in part.opts.lower():
+                known_mounts.add(part.device)
+        while not stop_ev.is_set():
+            current_mounts = set()
+            for part in psutil.disk_partitions(all=False):
+                if "removable" in part.opts.lower():
+                    current_mounts.add(part.device)
+                    if part.device not in known_mounts:
+                        ev = self.usb_watcher.handle_arrival(raw_serial=f"VOL_{part.device}", drive_letter=part.device[:2], fs_type=part.fstype)
+                        if ev:
+                            self.file_watcher.start_watching_drive(part.device[:2], ev["volume_serial_hash"], ev["event_id"])
+            for removed in (known_mounts - current_mounts):
+                self.usb_watcher.handle_removal(raw_serial=f"VOL_{removed}")
+            known_mounts = current_mounts
+            stop_ev.wait(5.0)
+
+    def _file_idle_loop(self, stop_ev: threading.Event):
+        while not stop_ev.is_set():
+            self.file_watcher.check_idle_sessions()
+            stop_ev.wait(2.0)
+
+    def _clipboard_poll_loop(self, stop_ev: threading.Event):
+        last_seq = None
+        while not stop_ev.is_set():
+            if win32clipboard is not None:
+                try:
+                    seq = win32clipboard.GetClipboardSequenceNumber()
+                    if last_seq is not None and seq != last_seq:
+                        fg_app, fg_title = get_foreground_process_and_title()
+                        win32clipboard.OpenClipboard()
+                        try:
+                            active_fmts = set()
+                            for fmt_name in PASSWORD_MANAGER_FORMATS:
+                                fmt_id = win32clipboard.RegisterClipboardFormat(fmt_name)
+                                if win32clipboard.IsClipboardFormatAvailable(fmt_id):
+                                    active_fmts.add(fmt_name)
+                            if win32clipboard.IsClipboardFormatAvailable(win32clipboard.CF_UNICODETEXT):
+                                data = win32clipboard.GetClipboardData(win32clipboard.CF_UNICODETEXT)
+                                if isinstance(data, str) and data.strip():
+                                    self.cb_watcher.process_clipboard_change("text", text_data=data, active_formats=active_fmts, foreground_app=fg_app, window_title=fg_title)
+                        finally:
+                            win32clipboard.CloseClipboard()
+                    last_seq = seq
+                except Exception:
+                    pass
+            stop_ev.wait(0.5)
+
+    def _apps_poll_loop(self, stop_ev: threading.Event):
+        while not stop_ev.is_set():
+            fg_app, fg_title = get_foreground_process_and_title()
+            self.app_watcher.record_poll_tick(fg_app, fg_title, elapsed_seconds=5)
+            stop_ev.wait(5.0)
+
+    def _sender_and_heartbeat_loop(self, stop_ev: threading.Event):
+        last_hb = 0.0
+        backoff = 1.0
+        while not stop_ev.is_set():
+            try:
+                self.flush_outbox_once()
+                backoff = 1.0
+            except Exception:
+                backoff = min(30.0, backoff * 2.0 + random.uniform(0.1, 0.5))
+
+            now = time.time()
+            if (now - last_hb) >= 60.0:
+                try:
+                    self.send_heartbeat_once()
+                    self.sync_config()
+                    last_hb = now
+                except Exception:
+                    pass
+            stop_ev.wait(min(2.0, backoff))
+
 
 def main():
     parser = argparse.ArgumentParser(description="Cyber XAI Module 3 OS-Level Endpoint Agent")
@@ -147,6 +249,7 @@ def main():
         print("[!] Another instance of Cyber XAI Endpoint Agent is already running. Exiting quietly (G1).")
         sys.exit(0)
 
+    agent = None
     try:
         print(f"[*] {TRANSPARENCY_NOTE}\n")
         agent = EndpointAgentRuntime(args.api_base, args.user_id, args.enrollment_code, Path(args.runtime_dir))
@@ -162,7 +265,29 @@ def main():
             agent.flush_outbox_once()
             print("[+] Setup checkpoint (--once) completed cleanly.")
             return
+
+        tray = AgentTrayUI(agent.stop_event)
+        tray.start_in_background()
+        agent.supervisor.run_supervised("usb", agent._usb_poll_loop, agent.stop_event)
+        agent.supervisor.run_supervised("file", agent._file_idle_loop, agent.stop_event)
+        agent.supervisor.run_supervised("clipboard", agent._clipboard_poll_loop, agent.stop_event)
+        agent.supervisor.run_supervised("apps", agent._apps_poll_loop, agent.stop_event)
+        sender_t = threading.Thread(target=agent._sender_and_heartbeat_loop, args=(agent.stop_event,), daemon=True)
+        sender_t.start()
+
+        print("[*] Endpoint Agent daemon active (Press Ctrl+C to stop gracefully)...")
+        while not agent.stop_event.is_set():
+            time.sleep(0.5)
+    except KeyboardInterrupt:
+        print("\n[*] Stopping Endpoint Agent gracefully...")
     finally:
+        if agent is not None:
+            try:
+                agent.app_watcher.flush_active_session()
+                agent.marker.mark_graceful_stop(agent.outbox, reason="user_shutdown")
+                agent.flush_outbox_once()
+            except Exception:
+                pass
         lock.release()
 
 

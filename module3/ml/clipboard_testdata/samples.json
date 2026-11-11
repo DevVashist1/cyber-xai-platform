@@ -1,0 +1,22 @@
+[
+  {
+    "id": "CB-SYN-01",
+    "text": "Hello team, meeting moved to 3 PM.",
+    "expected_tier": "low"
+  },
+  {
+    "id": "CB-SYN-02",
+    "text": "AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE\npassword=supersecret99",
+    "expected_tier": "high"
+  },
+  {
+    "id": "CB-SYN-03",
+    "text": "-----BEGIN RSA PRIVATE KEY-----\nMIIEpAIBAAKCAQEA",
+    "expected_tier": "high"
+  },
+  {
+    "id": "CB-SYN-04",
+    "text": "CONFIDENTIAL internal use only - PROJECT_OMEGA roadmap",
+    "expected_tier": "medium"
+  }
+]
