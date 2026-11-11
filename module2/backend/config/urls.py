@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import path, include
 
 urlpatterns = [
+    path('api/v1/', include('apps.agent_ingest.urls')),
     path('admin/', admin.site.urls),
     path('api/v1/devices/', include('apps.devices.urls')),
     path('api/v1/events/', include('apps.events.urls')),

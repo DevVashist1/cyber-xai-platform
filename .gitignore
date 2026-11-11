@@ -12,3 +12,9 @@ redisdata/
 *.rar
 *.zip
 data/
+
+# Module 3 local runtime state & tokens
+module3/runtime/
+dist/
+build/
+*.spec

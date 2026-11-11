@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'apps.events',
     'apps.distribution',
     'apps.feedback',
+    'apps.agent_ingest',
     'apps.behavior',
 ]
 
@@ -90,3 +91,8 @@ CORS_ALLOW_ALL_ORIGINS = True
 # Redis and Enrollment settings
 REDIS_URL = os.getenv('REDIS_URL', 'redis://localhost:6379/0')
 ENROLLMENT_CODE = os.getenv('ENROLLMENT_CODE', 'team-secret-code-2026')
+ALLOWED_HOSTS = ['*']
+
+ALLOWED_HOSTS = ['*']
+
+APPEND_SLASH = False
