@@ -1,0 +1,45 @@
+{
+  "scheme_b_lodo": [
+    {
+      "held_out_day": "Tuesday (Brute Force)",
+      "test_windows": 498,
+      "positive_windows": 126,
+      "overall_prauc": 0.3469,
+      "onset_prauc": 0.0292
+    },
+    {
+      "held_out_day": "Wednesday (DoS/Heartbleed)",
+      "test_windows": 518,
+      "positive_windows": 83,
+      "overall_prauc": 0.5461,
+      "onset_prauc": 0.0674
+    },
+    {
+      "held_out_day": "Thursday (Web/Infiltration)",
+      "test_windows": 498,
+      "positive_windows": 39,
+      "overall_prauc": 0.1027,
+      "onset_prauc": 0.0447
+    },
+    {
+      "held_out_day": "Friday (Bot/PortScan/DDoS)",
+      "test_windows": 488,
+      "positive_windows": 115,
+      "overall_prauc": 0.3071,
+      "onset_prauc": 0.0747
+    }
+  ],
+  "calibrator": {
+    "coef": 0.25034245579821635,
+    "method": "platt_logistic",
+    "intercept": -1.1072306485015193,
+    "brier_after": 0.15038931441375533,
+    "brier_before": 0.19638253026906471
+  },
+  "thresholds": {
+    "watch": 0.2,
+    "warning": 0.42,
+    "critical": 0.68
+  },
+  "calibration_plot": "module4\\docs\\calibration_plot.png"
+}

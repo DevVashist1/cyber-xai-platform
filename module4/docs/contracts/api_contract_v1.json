@@ -1,0 +1,20 @@
+﻿{
+  "module": "module4_network_forecasting",
+  "version": "1.0",
+  "tables": [
+    "net_window_base",
+    "net_feature_matrix",
+    "net_surge_episode",
+    "net_experiment_run",
+    "net_model_registry",
+    "net_forecast",
+    "net_alert_episode",
+    "net_feature_dictionary"
+  ],
+  "endpoints": [
+    "GET /api/v1/network/forecast?replay_run_id&from&to",
+    "GET /api/v1/network/alerts?replay_run_id&min_level",
+    "GET /api/v1/network/model",
+    "POST /api/v1/network/replay"
+  ]
+}

@@ -23,3 +23,8 @@ module3/runtime/
 dist/
 build/
 *.spec
+
+# Module 4 model binary files
+module4/artifacts/*.txt
+module4/artifacts/*.pkl
+module4/artifacts/*.bin
