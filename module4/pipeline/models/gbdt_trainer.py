@@ -32,9 +32,10 @@ import numpy as np
 import lightgbm as lgb
 from sklearn.datasets import dump_svmlight_file
 
-data = np.load(r"{npz_in}")
-X_tr, y_tr = data["X_train"], data["y_train"]
-X_va, X_te = data["X_val"], data["X_test"]
+with np.load(r"{npz_in}") as data:
+    X_tr, y_tr = data["X_train"].copy(), data["y_train"].copy()
+    X_va, X_te = data["X_val"].copy(), data["X_test"].copy()
+
 svm_tr = r"{tmp_dir / '_train.svm'}"
 dump_svmlight_file(X_tr, y_tr.astype(np.float64), svm_tr, zero_based=True)
 
@@ -64,12 +65,19 @@ np.savez(r"{npz_out}", val_p=val_p, test_p=test_p)
 """
     res = subprocess.run([sys.executable, "-c", worker_code], capture_output=True, text=True)
     for f in [npz_in, tmp_dir / "_train.svm"]:
-        if f.exists():
-            f.unlink()
+        try:
+            if f.exists():
+                f.unlink()
+        except Exception:
+            pass
     if res.returncode == 0 and npz_out.exists():
-        out = np.load(npz_out)
-        val_p, test_p = out["val_p"], out["test_p"]
-        npz_out.unlink()
+        with np.load(npz_out) as out:
+            val_p = out["val_p"].copy()
+            test_p = out["test_p"].copy()
+        try:
+            npz_out.unlink()
+        except Exception:
+            pass
         return val_p, test_p
     raise RuntimeError(f"LightGBM training failed: {res.stderr}")
 

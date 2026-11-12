@@ -1,4 +1,28 @@
 {
+  "test_prauc_95ci_episode_bootstrap": [
+    0.7329,
+    0.8695
+  ],
+  "level_wise_evaluation": [
+    {
+      "level": "Watch (>=1)",
+      "windows_fired": 485,
+      "precision": 0.0474,
+      "episodes_per_day": 97.0
+    },
+    {
+      "level": "Warning (>=2)",
+      "windows_fired": 266,
+      "precision": 0.0827,
+      "episodes_per_day": 53.2
+    },
+    {
+      "level": "Critical (==3)",
+      "windows_fired": 6,
+      "precision": 0.5,
+      "episodes_per_day": 1.2
+    }
+  ],
   "scheme_b_lodo": [
     {
       "held_out_day": "Tuesday (Brute Force)",
@@ -29,6 +53,12 @@
       "onset_prauc": 0.0747
     }
   ],
+  "w06_end_vs_start_time_sensitivity": {
+    "total_flows": 2827609,
+    "flows_crossing_1m_boundary_from_duration": 408728,
+    " boundary_shift_pct": 14.45,
+    "conclusion": "Assigning by end_time shifts long/slow DoS flows into the window where they actually complete, preventing future duration lookahead without altering overall surge episode boundaries."
+  },
   "calibrator": {
     "coef": 0.25034245579821635,
     "method": "platt_logistic",
@@ -37,9 +67,9 @@
     "brier_before": 0.19638253026906471
   },
   "thresholds": {
-    "watch": 0.2,
-    "warning": 0.42,
-    "critical": 0.68
+    "watch": 0.1,
+    "warning": 0.15,
+    "critical": 0.2947
   },
   "calibration_plot": "module4\\docs\\calibration_plot.png"
 }

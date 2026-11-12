@@ -1,0 +1,9 @@
+{
+  "active_model": "xgb_m4_v1",
+  "crosscheck_model": "lgb_m4_v1",
+  "xgb_file": "xgb_m4_v1.json",
+  "lgb_file": "lgb_m4_v1.txt",
+  "feature_count": 110,
+  "window_size_sec": 60,
+  "horizon_k": 3
+}
