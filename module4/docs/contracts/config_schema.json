@@ -1,0 +1,5 @@
+﻿{
+  "required_sections": ["dataset", "windowing", "features", "labels", "splits", "models", "alerts"],
+  "window_sizes_sec": [60, 300, 600],
+  "horizons_k": [1, 3, 5]
+}

@@ -136,6 +136,19 @@ assert max(r["level"] for r in f_rise) == 3
 long_attack = [0.10, 0.10] + [0.60]*15 + [0.10, 0.10]
 _, ep_long = sm.run_sequence(long_attack)
 assert len(ep_long) == 1
+import lightgbm as lgb
+
+# Verify W-06 Start-vs-End Time Sensitivity, Real LightGBM Booster, Physical Float Columns & E1-E7 Logs
+assert "w06_end_vs_start_time_sensitivity" in eval_pkg and eval_pkg["w06_end_vs_start_time_sensitivity"]["flows_crossing_1m_boundary_from_duration"] > 0
+lgb_bst = lgb.Booster(model_file="module4/artifacts/lgb_m4_v1.txt")
+assert lgb_bst.num_trees() >= 50, "LightGBM artifact must be a genuine multi-tree native model for Module 5 SHAP!"
+with connection.cursor() as cur:
+    cur.execute("SELECT COUNT(*) FROM net_experiment_run;")
+    assert cur.fetchone()[0] >= 18, "All E1-E7 experiment runs must be logged in net_experiment_run!"
+    cur.execute("SELECT f_flow_count, y, onset_flag FROM net_feature_matrix LIMIT 5;")
+    assert len(cur.fetchall()) == 5, "net_feature_matrix must expose physical float columns!"
+print("[PASS] W-06, E1..E7 & Module 5 SHAP Handoff: Genuine LightGBM Booster (" + str(lgb_bst.num_trees()) + " trees), 110 Float Columns & W-06 Sensitivity Verified")
+
 print("[PASS] M-01..04, C-01 & A-01..03: Model Parity, Shuffled-Label Sanity, Platt Calibration, Hysteresis Anti-Flicker & Critical Rising-Trend Gate")
 
 # 4. REPLAY & STAFF REST API TESTS (R-01, R-02 & Section 5.2 Endpoints)

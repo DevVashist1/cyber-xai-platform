@@ -28,3 +28,8 @@ build/
 module4/artifacts/*.txt
 module4/artifacts/*.pkl
 module4/artifacts/*.bin
+
+module4/artifacts/*.json
+!module4/artifacts/metadata.json
+module4/artifacts/*.npz
+module4/artifacts/*.svm
